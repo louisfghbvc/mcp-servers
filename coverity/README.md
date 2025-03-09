@@ -1,37 +1,67 @@
-# Setup
-- 
-    ```sh
-    # Create virtual environment and activate it
-    uv venv
-    source .venv/bin/activate
+# Coverity Report Tool
 
-    # Install dependencies
-    uv add "mcp[cli]"
-    ```
+## Setup
+1. **Create and Activate Virtual Environment**  
+   Execute the following commands to create and activate a virtual environment:
+   ```sh
+   # Create virtual environment and activate it
+   uv venv
+   source .venv/bin/activate
+   ```
 
-# Features
-- Query coverity issues by category
-- Query one coverity object by category
-    - struct format example
-    ```json
-    {
-        "type" : "AUTO_CAUSES_COPY",
-        "mainEventFilePathname": "/home/scratch.louiliu_vlsi_1/work/nvtools_louiliu_2/nvtools/cad/cadlib/vector/JetBasis/PropertyMap.h",
-        "mainEventLineNumber": 230,
-        "functionDisplayName" : "auto vectorlib::PropertyMapBase<vectorlib::ParameterPackHelper<vectorlib::DUTInst>, vectorlib::ParameterPackHelper<bool, int, unsigned int, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::deque<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >, std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::vector<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::vector<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > > > > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::bindCast<vectorlib::DUTInstCastHelper, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const &, vectorlib::DUTInst>(std::function<T2 (T3 const &, T4...)>)::[lambda(vectorlib::DUTInst const &) (instance 1)]::operator ()(vectorlib::DUTInst const &) const",
-        "events" : {
-            "eventDescription": [
-                "This lambda has an unspecified return type. This implies \"auto\" and causes the copy of an object of type \"std::string\".",
-                "Use \"-> const auto &\"\"std::string\".",
-                "This return statement creates a copy.",
-            ],
-            "subcategoryLongDescription" : "Using the auto keyword without an & causes a copy."
-        }
-    }
-    ```
-- Auto fix by cursor
-    - given a category
-    - for that category one-by-one
-    - use cursor to fix the error
-    
-# Implement Spec
+2. **Install Dependencies**  
+   Run the command below to install the necessary dependencies:
+   ```sh
+   # Install dependencies
+   uv add "mcp[cli]"
+   ```
+
+## Features
+- **Issue Summary**  
+  Aggregates and summarizes Coverity issues by type.
+
+- **Query a Specific Coverity Object by Category**  
+  Retrieve a single Coverity object that matches the specified category. The output format is as follows:
+  ```json
+  {
+      "type": "AUTO_CAUSES_COPY",
+      "mainEventFilepath": "/home/scratch.louiliu_vlsi_1/work/nvtools_louiliu_2/nvtools/cad/cadlib/vector/JetBasis/PropertyMap.h",
+      "mainEventLineNumber": 230,
+      "functionDisplayName": "auto vectorlib::PropertyMapBase<...>",
+      "events": {
+          "eventDescription": [
+              "This lambda has an unspecified return type. This implies \"auto\" and causes the copy of an object of type \"std::string\".",
+              "Use \"-> const auto &\" \"std::string\".",
+              "This return statement creates a copy."
+          ],
+          "subcategoryLongDescription": "Using the auto keyword without an & causes a copy."
+      }
+  }
+  ```
+
+- **Auto Fix by Cursor**  
+  Automatically fix issues for a given category by processing each matching entry. This generates a prompt that can be fed to an LLM. For example:
+  ```
+  Need to fix the coverity issue: {type} file is {mainEventFilepath} at line {mainEventLineNumber} in function {functionDisplayName}. Reason: {events.subcategoryLongDescription}. Details: {events.eventDescription joined by a space or newline}.
+  ```
+
+## Implementation Specification
+1. **Issue Aggregation**  
+   - Parse the report file's `issues` property.
+   - Group the issues by `type` and return a list that indicates each `type` along with its count.
+
+2. **Querying a Specific Coverity Object**  
+   - Search the report file's `issues` for the first object that matches the specified category (`type`).
+   - The output should include the following properties:
+     - `type`
+     - `mainEventFilepath`
+     - `mainEventLineNumber`
+     - `functionDisplayName`
+     - `subcategoryLongDescription` (directly from the issue)
+   - **Events Field**:  
+     - Concatenate all entries from the issue's `events.eventDescription` array and include them under the `eventDescription` section.
+
+3. **Auto Fix Feature**  
+   - For a given category, process each matching issue sequentially.
+   - Generate a prompt for each issue that an LLM can use to suggest or apply a fix.
+   - The prompt should adhere to the format provided above.
