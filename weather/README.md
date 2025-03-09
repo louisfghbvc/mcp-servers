@@ -57,5 +57,8 @@ print(forecast)
 - `weather.py`: 主要應用程式代碼
 - `pyproject.toml`: 專案配置和相依套件
 
+## Demo
+請參考 [Spec Story](./SpecStory.md)
+
 ## 授權
 MIT License
