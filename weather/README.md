@@ -28,6 +28,14 @@
    python -m weather
    ```
 
+4. Add into Cursor
+   - Cursor settings
+   - Add MCP
+   - Type `command`
+   ```bash
+   uv --directory /Users/louisfghbvc/Desktop/mcp-servers/weather run weather.py
+   ```
+
 ## 使用說明
 ### 獲取天氣警報
 使用 `get_alerts` 函數來獲取特定州的天氣警報：
