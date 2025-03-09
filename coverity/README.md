@@ -43,7 +43,7 @@
 - **Auto Fix by Cursor**  
   Automatically fix issues for a given category by processing each matching entry. This generates a prompt that can be fed to an LLM. For example:
   ```
-  Need to fix the coverity issue: {checkerName} file is {mainEventFilepath} at line {mainEventLineNumber} in function {functionDisplayName}. Reason: {events.subcategoryLongDescription}. Details: {events.eventDescription joined by a space or newline}.
+  Help me to fix the coverity issue: {checkerName} file is {mainEventFilepath} at line {mainEventLineNumber} in function {functionDisplayName}. Reason: {events.subcategoryLongDescription}. Details: {events.eventDescription joined by a space or newline}.
   ```
   注意：此功能只處理第一個匹配的問題，並直接返回 prompt 字串。
 

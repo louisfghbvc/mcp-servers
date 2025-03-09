@@ -160,7 +160,7 @@ class CoverityReportTool:
                     event_descriptions.append(event['eventDescription'])
         
         return (
-            f"Need to fix the coverity issue: {issue.get('checkerName', '')} "
+            f"Help me to fix the coverity issue: {issue.get('checkerName', '')} "
             f"file is {issue.get('mainEventFilePathname', '')} "
             f"at line {issue.get('mainEventLineNumber', 0)} "
             f"in function {issue.get('functionDisplayName', '')}. "
@@ -198,7 +198,7 @@ async def query(category: str) -> str:
 
 @mcp.tool()
 async def fix(category: str) -> str:
-    """Auto fix coverity issues by category and save updated report.
+    """Auto fix coverity issues by category.
     Args:
         category: The category to filter issues for auto fix.
     """
