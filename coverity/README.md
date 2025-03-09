@@ -18,10 +18,10 @@
 
 ## Features
 - **Issue Summary**  
-  Aggregates and summarizes Coverity issues by type.
+  Aggregates and summarizes Coverity issues by checkerName.
 
 - **Query a Specific Coverity Object by Category**  
-  Retrieve a single Coverity object that matches the specified category. The output format is as follows:
+  Retrieve a single Coverity object that matches the specified category (checkerName). The output format is as follows:
   ```json
   {
       "type": "AUTO_CAUSES_COPY",
@@ -38,22 +38,23 @@
       }
   }
   ```
+  注意：輸出中的 "type" 欄位實際上對應報告中的 "checkerName" 值。
 
 - **Auto Fix by Cursor**  
   Automatically fix issues for a given category by processing each matching entry. This generates a prompt that can be fed to an LLM. For example:
   ```
-  Need to fix the coverity issue: {type} file is {mainEventFilepath} at line {mainEventLineNumber} in function {functionDisplayName}. Reason: {events.subcategoryLongDescription}. Details: {events.eventDescription joined by a space or newline}.
+  Need to fix the coverity issue: {checkerName} file is {mainEventFilepath} at line {mainEventLineNumber} in function {functionDisplayName}. Reason: {events.subcategoryLongDescription}. Details: {events.eventDescription joined by a space or newline}.
   ```
 
 ## Implementation Specification
 1. **Issue Aggregation**  
    - Parse the report file's `issues` property.
-   - Group the issues by `type` and return a list that indicates each `type` along with its count.
+   - Group the issues by `checkerName` and return a list that indicates each `checkerName` along with its count.
 
 2. **Querying a Specific Coverity Object**  
-   - Search the report file's `issues` for the first object that matches the specified category (`type`).
+   - Search the report file's `issues` for the first object that matches the specified category (`checkerName`).
    - The output should include the following properties:
-     - `type`
+     - `type` (contains the value of `checkerName`)
      - `mainEventFilepath`
      - `mainEventLineNumber`
      - `functionDisplayName`
