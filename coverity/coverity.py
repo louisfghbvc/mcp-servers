@@ -116,21 +116,6 @@ class CoverityReportTool:
                 summary[checker_name] = 1
         return summary
     
-    def save_fixed_report(self) -> None:
-        """Save the updated report to the fixed report path.
-        
-        Raises:
-            InvalidReportError: If there is an error saving the report
-        """
-        if self._data is None:
-            raise InvalidReportError("No data to save")
-        
-        try:
-            with open(self.fixed_report_path, 'w', encoding='utf-8') as f:
-                json.dump(self._data, f, indent=2)
-        except Exception as e:
-            raise InvalidReportError(f"Error saving fixed report: {e}")
-    
     def format_issue_for_query(self, issue: Dict[str, Any]) -> Dict[str, Any]:
         """Format an issue for the query response.
         
@@ -221,31 +206,23 @@ async def fix(category: str) -> str:
         matching_issues = coverity_tool.query_issues_by_category(category)
         
         if not matching_issues:
-            return json.dumps({"error": f"No issues found for category: {category}"}, indent=2)
+            return f"No issues found for category: {category}"
         
-        # Generate prompts for each issue
-        prompts = []
-        for issue in matching_issues:
-            # Mark the issue as fixed
-            coverity_tool.auto_fix_issue(issue)
-            
-            # Create a prompt for LLM
-            prompt = coverity_tool.create_fix_prompt(issue)
-            prompts.append(prompt)
+        # Only process the first matching issue
+        issue = matching_issues[0]
         
-        # Save the updated report
-        coverity_tool.save_fixed_report()
+        # Mark the issue as fixed
+        coverity_tool.auto_fix_issue(issue)
         
-        result = {
-            "fixed_count": len(matching_issues),
-            "prompts": prompts
-        }
+        # Create a prompt for LLM
+        prompt = coverity_tool.create_fix_prompt(issue)
         
-        return json.dumps(result, indent=2)
+        # Return the prompt directly
+        return prompt
     except CoverityError as e:
-        return json.dumps({"error": str(e)}, indent=2)
+        return f"Error: {str(e)}"
     except Exception as e:
-        return json.dumps({"error": f"Unexpected error: {str(e)}"}, indent=2)
+        return f"Unexpected error: {str(e)}"
 
 
 @mcp.tool()
@@ -272,6 +249,10 @@ async def summary() -> str:
 # - Provide detailed view for each issue
 # - Integrate with version control systems for auto commit of fixes
 # - Real-time monitoring for new coverity issues
+# - Add support for batch processing multiple categories at once
+# - Implement a web interface for easier interaction
+# - Add support for custom fix templates
+# - Integrate with CI/CD pipelines for automated fixes
 
 if __name__ == "__main__":
-    mcp.run(transport='stdio')
+    mcp.run()

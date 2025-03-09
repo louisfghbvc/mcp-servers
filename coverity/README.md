@@ -45,6 +45,7 @@
   ```
   Need to fix the coverity issue: {checkerName} file is {mainEventFilepath} at line {mainEventLineNumber} in function {functionDisplayName}. Reason: {events.subcategoryLongDescription}. Details: {events.eventDescription joined by a space or newline}.
   ```
+  注意：此功能只處理第一個匹配的問題，並直接返回 prompt 字串。
 
 ## Implementation Specification
 1. **Issue Aggregation**  
@@ -63,6 +64,7 @@
      - Concatenate all entries from the issue's `events.eventDescription` array and include them under the `eventDescription` section.
 
 3. **Auto Fix Feature**  
-   - For a given category, process each matching issue sequentially.
-   - Generate a prompt for each issue that an LLM can use to suggest or apply a fix.
+   - For a given category, process the first matching issue.
+   - Generate a prompt that an LLM can use to suggest or apply a fix.
    - The prompt should adhere to the format provided above.
+   - Return the prompt directly as a string.
